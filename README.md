@@ -3,7 +3,7 @@ Word counter tool, allows to read the repetition of the words in a given text fi
 A text file word.txt is provided to test the app
 
 Run
-#java -jar "path\to\file"
+#java -jar counter-0.0.1-SNAPSHOT.jar "path\to\file"
 
 
 
