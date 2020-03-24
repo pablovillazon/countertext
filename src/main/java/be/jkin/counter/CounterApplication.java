@@ -6,11 +6,13 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toMap;
 
 @SpringBootApplication
 public class CounterApplication implements CommandLineRunner {
@@ -19,55 +21,35 @@ public class CounterApplication implements CommandLineRunner {
 	private Object Function;
 
 	public static void main(String[] args) {
-
 		LOG.info("STARTING THE APPLICATION");
 		SpringApplication.run(CounterApplication.class, args);
 		LOG.info("APPLICATION FINISHED");
 	}
 
-	interface Function<T>
-	{
-		void apply(T t);
-	}
 	@Override
 	public void run(String[] args) throws Exception {
 		LOG.info("EXECUTING : command line runner");
 
-		String filePath = "c:\\Temp\\words.txt";
-/*
 		if(args.length == 0) {
-			System.out.println("Ingrese la ruta del archivo");
+			LOG.error("Ingrese la ruta del archivo");
 			return;
 		}
 
-		StringBuilder sb = new StringBuilder();
+		String filePath = args[0] != null? args[0]: "c:\\Temp\\words.txt";
 
-		try(BufferedReader br = Files.newBufferedReader(Paths.get(args[0])))
-		{
-			String line;
-			while((line=br.readLine()) != null){
-				sb.append(line).append("\n");
-			}
-		}catch(IOException ex){
-			LOG.error(ex.getMessage());
-			System.err.format("IOException: %s%n", ex);
-		}
-*/
-		//System.out.println(sb);
-		/*
-		for (int i = 0; i < args.length; ++i) {
-			LOG.info("args[{}]: {}", i, args[i]);
-		}*/
-
-		//another cool way to read file
+		//a cool way to read file
 		LOG.info("Reading in a coolest way");
-		Files.lines(new File(filePath).toPath())
-				.map(s -> s.trim())
-				.filter(s-> !s.isEmpty())
-				.forEach(System.out::println);
-		
+
+		Path path = Paths.get(filePath);
+		Map<String, Integer> wordCount = Files.lines(path).flatMap(line -> Arrays.stream(line.trim().split(" ")))
+				.map(word -> word.replaceAll("[^a-zA-Z]", "").toLowerCase().trim())
+				.filter(word -> word.length() > 0)
+				.map(word -> new AbstractMap.SimpleEntry<>(word, 1))
+				.collect(toMap(e -> e.getKey(), e -> e.getValue(), (v1, v2) -> v1 + v2));
+
+		wordCount.entrySet().stream().sorted(Map.Entry.<String, Integer>comparingByValue().reversed()).forEachOrdered(System.out::println);
 
 		LOG.info("---End Reading in a coolest way---");
-
 	}
+
 }
